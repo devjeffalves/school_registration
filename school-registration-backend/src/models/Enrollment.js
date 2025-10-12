@@ -23,18 +23,24 @@ const addressSchema = new mongoose.Schema({
   street: { type: String, required: true, trim: true },
   city: { type: String, required: true, trim: true },
   state: { type: String, required: true, trim: true },
-  zipCode: { type: String, required: true, trim: true }
+  zipCode: { type: String, required: true, trim: true },
+  number: { type: String, trim: true },        // opcional
+  complement: { type: String, trim: true },    // opcional
+  neighborhood: { type: String, trim: true }   // opcional
 }, { _id: false });
 
 const studentSchema = new mongoose.Schema({
   fullName: { type: String, required: true, trim: true },
   birthDate: { type: Date, required: true },
+  cpf: { type: String, trim: true },
   gender: { type: String, enum: ["male", "female"], required: true },
-  naturalidade: { type: String, trim: true },
+  nationality: { type: String, trim: true },
   previousSchool: { type: String, trim: true },
-  grade: { type: String, trim: true }, // série/ano pretendido
+  grade: { type: String, trim: true },
   healthInfo: { type: healthInfoSchema }
 }, { _id: false });
+
+
 
 const enrollmentSchema = new mongoose.Schema({
   student: { type: studentSchema, required: true },

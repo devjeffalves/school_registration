@@ -19,3 +19,4 @@ export const getEnrollments = async (req, res) => {
     res.status(500).json({ message: "Erro ao buscar matrículas" });
   }
 };
+

@@ -1,6 +1,4 @@
 
-
-
 "use client";
 import React, { useState } from "react";
 
@@ -37,9 +35,10 @@ export default function Step1StudentInfo({ formData, handleInputChange, nextStep
 
     // Campos obrigatórios do aluno
     if (!formData.studentName) newErrors.studentName = "Campo obrigatório";
-    if (!formData.birthDate) newErrors.birthDate = "Campo obrigatório";
-    if (!formData.gender) newErrors.gender = "Campo obrigatório";
-    if (!formData.desiredGrade) newErrors.desiredGrade = "Campo obrigatório";
+    if (!formData.studentCPF) newErrors.studentCPF = "Campo obrigatório";
+    if (!formData.studentBirthDate) newErrors.studentBirthDate = "Campo obrigatório";
+    if (!formData.nationality) newErrors.nationality = "Campo obrigatório";
+    if (!formData.previousSchool) newErrors.previousSchool = "Campo obrigatório";
 
     // Validação das pessoas autorizadas
     authorizedPersons.forEach((person, index) => {
@@ -64,19 +63,53 @@ export default function Step1StudentInfo({ formData, handleInputChange, nextStep
     return Object.keys(newErrors).length === 0;
   };
 
+
   const handleNext = () => {
     if (validateForm()) {
-      // Atualiza os dados das pessoas autorizadas no formData antes de ir para o próximo step
-      handleInputChange("authorizedPersons", authorizedPersons);
+      const healthInfo = {
+        allergies: [
+          formData.medicineAllergyDetails,
+          formData.insectAllergyDetails,
+          formData.productAllergyDetails,
+        ].filter(Boolean).join("; "),
+        medications: [
+          formData.regularMedicineDetails,
+          formData.feverMedicine,
+        ].filter(Boolean).join("; "),
+        notes: formData.healthNotes || ""
+      };
+
+      const student = {
+        fullName: formData.studentName || "",
+        birthDate: formData.studentBirthDate || "",
+        cpf: formData.studentCPF || "",
+        gender: formData.gender || "",
+        previousSchool: formData.previousSchool || "",
+        grade: formData.desiredGrade || "",
+        nationality: formData.nationality || "",
+        healthInfo,
+        authorizedPersons: authorizedPersons.map(p => ({
+          name: p.name,
+          phone: p.phone,
+          relation: p.relation,
+          documentName: p.document ? p.document.name : null,
+        }))
+      };
+
+      console.log("📌 Step1 - Dados completos:", student);
+
+      handleInputChange("student", student);
+
       nextStep();
     }
   };
+
 
   return (
     <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-xl p-8">
       {/* Dados do Aluno */}
       <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center">
-        👤 Dados do Aluno
+        👤 Dados do Aluno(a)
       </h2>
 
       <form className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -87,101 +120,153 @@ export default function Step1StudentInfo({ formData, handleInputChange, nextStep
             type="text"
             value={formData.studentName || ""}
             onChange={(e) => handleInputChange("studentName", e.target.value)}
-            placeholder="Digite o nome do aluno"
-            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 ${
-              errors.studentName ? "border-red-500" : "border-gray-300"
-            }`}
+            placeholder="Digite o nome do aluno(a)"
+            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 ${errors.studentName ? "border-red-500" : "border-gray-300"
+              }`}
           />
-          {errors.studentName && <p className="text-red-500 text-sm mt-1">{errors.studentName}</p>}
+          {errors.studentName && (
+            <p className="text-red-500 text-sm mt-1">{errors.studentName}</p>
+          )}
         </div>
 
         {/* Data de nascimento */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Data de Nascimento *</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Data de Nascimento *
+          </label>
           <input
             type="date"
-            value={formData.birthDate || ""}
-            onChange={(e) => handleInputChange("birthDate", e.target.value)}
-            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 ${
-              errors.birthDate ? "border-red-500" : "border-gray-300"
-            }`}
+            value={formData.studentBirthDate || ""}
+            onChange={(e) => handleInputChange("studentBirthDate", e.target.value)}
+            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 ${errors.studentBirthDate ? "border-red-500" : "border-gray-300"
+              }`}
           />
-          {errors.birthDate && <p className="text-red-500 text-sm mt-1">{errors.birthDate}</p>}
+          {errors.studentBirthDate && (
+            <p className="text-red-500 text-sm mt-1">{errors.studentBirthDate}</p>
+          )}
         </div>
 
         {/* CPF do aluno */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">CPF do Aluno</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">CPF</label>
           <input
             type="text"
             placeholder="000.000.000-00"
             value={formData.studentCPF || ""}
-            onChange={(e) => handleInputChange("studentCPF", e.target.value)}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+            onChange={(e) => {
+              let value = e.target.value.replace(/\D/g, "");
+              if (value.length > 11) value = value.slice(0, 11);
+              value = value.replace(/(\d{3})(\d)/, "$1.$2");
+              value = value.replace(/(\d{3})(\d)/, "$1.$2");
+              value = value.replace(/(\d{3})(\d{1,2})$/, "$1-$2");
+              handleInputChange("studentCPF", value);
+            }}
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
         </div>
 
         {/* Sexo */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Sexo *</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Sexo </label>
           <select
             value={formData.gender || ""}
             onChange={(e) => handleInputChange("gender", e.target.value)}
-            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 ${
-              errors.gender ? "border-red-500" : "border-gray-300"
-            }`}
+            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 ${errors.gender ? "border-red-500" : "border-gray-300"
+              }`}
           >
             <option value="">Selecione</option>
             <option value="male">Masculino</option>
             <option value="female">Feminino</option>
           </select>
-          {errors.gender && <p className="text-red-500 text-sm mt-1">{errors.gender}</p>}
         </div>
 
-        {/* Escola de origem */}
+        {/* Naturalidade*/}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Escola de Origem</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Naturalidade *</label>
           <input
             type="text"
-            placeholder="Nome da escola anterior (se houver)"
-            value={formData.previousSchool || ""}
-            onChange={(e) => handleInputChange("previousSchool", e.target.value)}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+            placeholder="Cidade onde nasceu"
+            value={formData.nationality || ""}
+            onChange={(e) => handleInputChange("nationality", e.target.value)}
+            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 ${errors.nationality ? "border-red-500" : "border-gray-300"
+              }`}
           />
+          {errors.nationality && (
+            <p className="text-red-500 text-sm mt-1">{errors.nationality}</p>
+          )}
         </div>
 
-        {/* Ano/Série pretendida */}
+        {/* Escola */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Ano/Série Pretendida *</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Escola *</label>
+          <input
+            type="text"
+            placeholder="Nome da escola de Ensino Regular"
+            value={formData.previousSchool || ""}
+            onChange={(e) => handleInputChange("previousSchool", e.target.value)}
+            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 ${errors.previousSchool ? "border-red-500" : "border-gray-300"
+              }`}
+          />
+          {errors.previousSchool && (
+            <p className="text-red-500 text-sm mt-1">{errors.previousSchool}</p>
+          )}
+        </div>
+
+        {/* Ano/Série */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Ano/Série </label>
           <select
             value={formData.desiredGrade || ""}
             onChange={(e) => handleInputChange("desiredGrade", e.target.value)}
-            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 ${
-              errors.desiredGrade ? "border-red-500" : "border-gray-300"
-            }`}
+            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 ${errors.desiredGrade ? "border-red-500" : "border-gray-300"
+              }`}
           >
             <option value="">Selecione</option>
             {[...Array(9)].map((_, i) => (
-              <option key={i} value={`${i + 1}ano`}>{i + 1}º Ano</option>
+              <option key={i} value={`${i + 1}ano`}>
+                {i + 1}º Ano{" "}
+              </option>
             ))}
           </select>
-          {errors.desiredGrade && <p className="text-red-500 text-sm mt-1">{errors.desiredGrade}</p>}
+          {errors.desiredGrade && (
+            <p className="text-red-500 text-sm mt-1">{errors.desiredGrade}</p>
+          )}
         </div>
       </form>
 
       {/* Informações Médicas */}
       <div className="mt-10">
-        <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center">🏥 Informações Médicas</h3>
+        <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
+          🏥 Informações Médicas
+        </h3>
         <div className="bg-red-50 border border-red-200 rounded-lg p-6 space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {[
-              { label: "Alergia a Medicamentos?", field: "medicineAllergy", detailsField: "medicineAllergyDetails" },
-              { label: "Alergia a Insetos?", field: "insectAllergy", detailsField: "insectAllergyDetails" },
-              { label: "Alergia a Produtos?", field: "productAllergy", detailsField: "productAllergyDetails" },
-              { label: "Toma Medicamento Regularmente?", field: "regularMedicine", detailsField: "regularMedicineDetails" },
+              {
+                label: "Alergia a Medicamentos?",
+                field: "medicineAllergy",
+                detailsField: "medicineAllergyDetails",
+              },
+              {
+                label: "Alergia a Insetos?",
+                field: "insectAllergy",
+                detailsField: "insectAllergyDetails",
+              },
+              {
+                label: "Alergia a Produtos?",
+                field: "productAllergy",
+                detailsField: "productAllergyDetails",
+              },
+              {
+                label: "Toma Medicamento Regularmente?",
+                field: "regularMedicine",
+                detailsField: "regularMedicineDetails",
+              },
             ].map(({ label, field, detailsField }) => (
               <div key={field}>
-                <label className="block text-sm font-medium text-gray-700 mb-2">{label}</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  {label}
+                </label>
                 <div className="flex space-x-4">
                   {["sim", "nao"].map((val) => (
                     <label key={val} className="flex items-center">
@@ -198,20 +283,19 @@ export default function Step1StudentInfo({ formData, handleInputChange, nextStep
                   ))}
                 </div>
 
-                {/* Campo extra para detalhes, obrigatório se "Sim" */}
                 <div
-                  className={`transition-all duration-500 ease-in-out overflow-hidden ${
-                    formData[field] === "sim" ? "max-h-40 mt-2" : "max-h-0 mt-0"
-                  }`}
+                  className={`transition-all duration-500 ease-in-out overflow-hidden ${formData[field] === "sim" ? "max-h-40 mt-2" : "max-h-0 mt-0"
+                    }`}
                 >
                   <input
                     type="text"
                     placeholder="Detalhes..."
                     value={formData[detailsField] || ""}
                     onChange={(e) => handleInputChange(detailsField, e.target.value)}
-                    className={`w-full px-4 py-2 border rounded-lg focus:ring-2 ${
-                      errors[detailsField] ? "border-red-500 focus:ring-red-400" : "border-gray-300 focus:ring-red-400"
-                    } bg-white`}
+                    className={`w-full px-4 py-2 border rounded-lg focus:ring-2 ${errors[detailsField]
+                      ? "border-red-500 focus:ring-red-400"
+                      : "border-gray-300 focus:ring-red-400"
+                      } bg-white`}
                   />
                   {errors[detailsField] && (
                     <p className="text-red-500 text-sm mt-1">{errors[detailsField]}</p>
@@ -239,56 +323,85 @@ export default function Step1StudentInfo({ formData, handleInputChange, nextStep
       {/* Pessoas Autorizadas */}
       <div className="mt-8">
         <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
-          👥 Pessoas Autorizadas para Buscar o Aluno
+          👥 Pessoas Autorizadas para Buscar
         </h3>
 
         {authorizedPersons.map((person, index) => (
           <div key={index} className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-4">
             <div className="flex justify-between items-center mb-4">
-              <h4 className="text-lg font-semibold text-gray-800">Pessoa Autorizada #{index + 1}</h4>
+              <h4 className="text-lg font-semibold text-gray-800">
+                Pessoa Autorizada #{index + 1}
+              </h4>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Nome Completo *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Nome Completo *
+                </label>
                 <input
                   type="text"
                   value={person.name}
-                  onChange={(e) => handleAuthorizedChange(index, "name", e.target.value)}
+                  onChange={(e) =>
+                    handleAuthorizedChange(index, "name", e.target.value)
+                  }
                   placeholder="Nome completo"
-                  className={`w-full px-4 py-3 border rounded-lg focus:ring-2 ${
-                    errors[`authorizedName${index}`] ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-blue-500"
-                  } bg-white`}
+                  className={`w-full px-4 py-3 border rounded-lg focus:ring-2 ${errors[`authorizedName${index}`]
+                    ? "border-red-500 focus:ring-red-500"
+                    : "border-gray-300 focus:ring-blue-500"
+                    } bg-white`}
                 />
                 {errors[`authorizedName${index}`] && (
-                  <p className="text-red-500 text-sm mt-1">{errors[`authorizedName${index}`]}</p>
+                  <p className="text-red-500 text-sm mt-1">
+                    {errors[`authorizedName${index}`]}
+                  </p>
                 )}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Telefone *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Telefone *
+                </label>
                 <input
                   type="tel"
                   value={person.phone}
-                  onChange={(e) => handleAuthorizedChange(index, "phone", e.target.value)}
+                  onChange={(e) => {
+                    let value = e.target.value.replace(/\D/g, "");
+                    if (value.length > 11) value = value.slice(0, 11);
+                    if (value.length > 0) {
+                      value = value.replace(/^(\d{2})(\d)/g, "($1) $2");
+                    }
+                    if (value.length >= 7) {
+                      value = value.replace(/(\d{5})(\d{4})$/, "$1-$2");
+                    }
+                    handleAuthorizedChange(index, "phone", value);
+                  }}
                   placeholder="(11) 99999-9999"
-                  className={`w-full px-4 py-3 border rounded-lg focus:ring-2 ${
-                    errors[`authorizedPhone${index}`] ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-blue-500"
-                  } bg-white`}
+                  className={`w-full px-4 py-3 border rounded-lg focus:ring-2 ${errors[`authorizedPhone${index}`]
+                    ? "border-red-500 focus:ring-red-500"
+                    : "border-gray-300 focus:ring-blue-500"
+                    } bg-white`}
                 />
                 {errors[`authorizedPhone${index}`] && (
-                  <p className="text-red-500 text-sm mt-1">{errors[`authorizedPhone${index}`]}</p>
+                  <p className="text-red-500 text-sm mt-1">
+                    {errors[`authorizedPhone${index}`]}
+                  </p>
                 )}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Grau de Parentesco *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Grau de Parentesco *
+                </label>
                 <select
                   value={person.relation}
-                  onChange={(e) => handleAuthorizedChange(index, "relation", e.target.value)}
-                  className={`w-full px-4 py-3 border rounded-lg focus:ring-2 ${
-                    errors[`authorizedRelation${index}`] ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-blue-500"
-                  } bg-white`}
+                  onChange={(e) =>
+                    handleAuthorizedChange(index, "relation", e.target.value)
+                  }
+                  className={`w-full px-4 py-3 border rounded-lg focus:ring-2 ${errors[`authorizedRelation${index}`]
+                    ? "border-red-500 focus:ring-red-500"
+                    : "border-gray-300 focus:ring-blue-500"
+                    } bg-white`}
                 >
                   <option value="">Selecione</option>
                   <option value="pai">Pai</option>
@@ -298,22 +411,30 @@ export default function Step1StudentInfo({ formData, handleInputChange, nextStep
                   <option value="irmao">Irmão/Irmã</option>
                   <option value="primo">Primo/Prima</option>
                   <option value="amigo">Amigo da Família</option>
-                  <option value="outro">Outro</option>
+                  <option value="transporte">Transporte Escolar</option>
                 </select>
                 {errors[`authorizedRelation${index}`] && (
-                  <p className="text-red-500 text-sm mt-1">{errors[`authorizedRelation${index}`]}</p>
+                  <p className="text-red-500 text-sm mt-1">
+                    {errors[`authorizedRelation${index}`]}
+                  </p>
                 )}
               </div>
             </div>
 
             <div className="mt-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">Documento de Identificação com Foto</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Documento de Identificação com Foto *
+              </label>
               <div
                 className="file-drop-zone p-4 rounded-lg text-center cursor-pointer border border-dashed border-blue-400 hover:bg-blue-100 transition"
-                onClick={() => document.getElementById(`authorizedDoc${index}`).click()}
+                onClick={() =>
+                  document.getElementById(`authorizedDoc${index}`).click()
+                }
               >
                 <div className="text-2xl mb-2">🆔</div>
-                <p className="text-gray-600 text-sm mb-1">Clique para enviar RG, CNH ou outro documento</p>
+                <p className="text-gray-600 text-sm mb-1">
+                  Clique para enviar RG, CNH ou outro documento
+                </p>
                 <p className="text-xs text-gray-500">PDF, JPG ou PNG (máx. 5MB)</p>
                 <input
                   type="file"
@@ -323,7 +444,9 @@ export default function Step1StudentInfo({ formData, handleInputChange, nextStep
                   onChange={(e) => handleAuthorizedFile(index, e.target.files[0])}
                 />
               </div>
-              {person.document && <p className="mt-2 text-sm text-green-600">📎 {person.document.name}</p>}
+              {person.document && (
+                <p className="mt-2 text-sm text-green-600">📎 {person.document.name}</p>
+              )}
             </div>
           </div>
         ))}
@@ -350,3 +473,5 @@ export default function Step1StudentInfo({ formData, handleInputChange, nextStep
     </div>
   );
 }
+
+
