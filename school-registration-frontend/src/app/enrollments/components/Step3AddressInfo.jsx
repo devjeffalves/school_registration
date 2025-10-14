@@ -686,40 +686,224 @@
 //   );
 // }
 
+// "use client";
+// import React from "react";
+
+// export default function Step3AddressInfo({ formData, handleInputChange, onNext, onPrevious }) {
+//   // Função para atualizar os campos do endereço
+//   const handleChange = (field, value) => {
+//     handleInputChange(field, value);
+//   };
+
+//   return (
+//     <div id="step3" className="fade-in max-w-4xl mx-auto bg-white rounded-2xl shadow-xl p-8">
+//       <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+//         🏠 Endereço Residencial
+//       </h2>
+
+//       {/* Container */}
+//       <div className="bg-gray-50 p-6 rounded-lg">
+//         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+//           {/* CEP */}
+//           <div className="md:col-span-2">
+//             <label className="block text-sm font-medium text-gray-700 mb-2">CEP *</label>
+//             <input
+//               type="text"
+//               value={formData.zipCode || ""}
+//               onChange={(e) => handleChange("zipCode", e.target.value)}
+//               placeholder="00000-000"
+//               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+//               required
+//             />
+//           </div>
+
+//           {/* Rua / Endereço */}
+//           <div className="md:col-span-2">
+//             <label className="block text-sm font-medium text-gray-700 mb-2">Endereço *</label>
+//             <input
+//               type="text"
+//               value={formData.street || ""}
+//               onChange={(e) => handleChange("street", e.target.value)}
+//               placeholder="Rua, Avenida, Travessa..."
+//               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+//               required
+//             />
+//           </div>
+
+//           {/* Número */}
+//           <div>
+//             <label className="block text-sm font-medium text-gray-700 mb-2">Número *</label>
+//             <input
+//               type="text"
+//               value={formData.number || ""}
+//               onChange={(e) => handleChange("number", e.target.value)}
+//               placeholder="Número da residência"
+//               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+//               required
+//             />
+//           </div>
+
+//           {/* Complemento */}
+//           <div>
+//             <label className="block text-sm font-medium text-gray-700 mb-2">Complemento</label>
+//             <input
+//               type="text"
+//               value={formData.complement || ""}
+//               onChange={(e) => handleChange("complement", e.target.value)}
+//               placeholder="Apto, Bloco, etc."
+//               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+//             />
+//           </div>
+
+//           {/* Bairro */}
+//           <div>
+//             <label className="block text-sm font-medium text-gray-700 mb-2">Bairro *</label>
+//             <input
+//               type="text"
+//               value={formData.neighborhood || ""}
+//               onChange={(e) => handleChange("neighborhood", e.target.value)}
+//               placeholder="Bairro"
+//               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+//               required
+//             />
+//           </div>
+
+//           {/* Cidade */}
+//           <div>
+//             <label className="block text-sm font-medium text-gray-700 mb-2">Cidade *</label>
+//             <input
+//               type="text"
+//               value={formData.city || ""}
+//               onChange={(e) => handleChange("city", e.target.value)}
+//               placeholder="Cidade"
+//               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+//               required
+//             />
+//           </div>
+
+//           {/* Estado */}
+//           <div>
+//             <label className="block text-sm font-medium text-gray-700 mb-2">Estado *</label>
+//             <select
+//               value={formData.state || ""}
+//               onChange={(e) => handleChange("state", e.target.value)}
+//               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+//               required
+//             >
+//               <option value="">Selecione</option>
+//               <option value="SP">São Paulo</option>
+//               <option value="RJ">Rio de Janeiro</option>
+//               <option value="MG">Minas Gerais</option>
+//               <option value="RS">Rio Grande do Sul</option>
+//               <option value="PR">Paraná</option>
+//               <option value="SC">Santa Catarina</option>
+//               <option value="BA">Bahia</option>
+//               <option value="GO">Goiás</option>
+//               <option value="PE">Pernambuco</option>
+//               <option value="CE">Ceará</option>
+//             </select>
+//           </div>
+//         </div>
+
+//         {/* Botões de navegação */}
+//         <div className="flex justify-between mt-8">
+//           <button
+//             type="button"
+//             onClick={onPrevious}
+//             className="bg-gray-500 hover:bg-gray-600 text-white px-8 py-3 rounded-lg font-medium transition-colors"
+//           >
+//             ← Anterior
+//           </button>
+//           <button
+//             type="button"
+//             onClick={onNext}
+//             className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-medium transition-colors"
+//           >
+//             Próximo →
+//           </button>
+//         </div>
+//       </div>
+//     </div>
+//   );
+// }
+
 "use client";
 import React from "react";
 
-export default function Step3AddressInfo({ formData, handleInputChange, onNext, onPrevious }) {
-  // Função para atualizar os campos do endereço
+export default function Step3AddressInfo({
+  formData,
+  handleInputChange,
+  onNext,
+  onPrevious,
+}) {
+  // Atualiza os campos do endereço
   const handleChange = (field, value) => {
     handleInputChange(field, value);
   };
 
+  // Máscara simples de CEP
+  const formatZipCode = (value) => {
+    return value
+      .replace(/\D/g, "")
+      .replace(/(\d{5})(\d{1,3})/, "$1-$2")
+      .substring(0, 9);
+  };
+
+  // Verifica se campos obrigatórios estão preenchidos
+  const isFormValid = () => {
+    const requiredFields = [
+      "zipCode",
+      "street",
+      "number",
+      "neighborhood",
+      "city",
+      "state",
+    ];
+    return requiredFields.every((field) => formData[field]?.trim() !== "");
+  };
+
+  const handleNextStep = () => {
+    if (!isFormValid()) {
+      alert("⚠️ Por favor, preencha todos os campos obrigatórios do endereço.");
+      return;
+    }
+    onNext();
+  };
+
   return (
-    <div id="step3" className="fade-in max-w-4xl mx-auto bg-white rounded-2xl shadow-xl p-8">
+    <div
+      id="step3"
+      className="fade-in max-w-4xl mx-auto bg-white rounded-2xl shadow-xl p-8"
+    >
       <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center">
         🏠 Endereço Residencial
       </h2>
 
-      {/* Container */}
       <div className="bg-gray-50 p-6 rounded-lg">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* CEP */}
           <div className="md:col-span-2">
-            <label className="block text-sm font-medium text-gray-700 mb-2">CEP *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              CEP *
+            </label>
             <input
               type="text"
               value={formData.zipCode || ""}
-              onChange={(e) => handleChange("zipCode", e.target.value)}
+              onChange={(e) =>
+                handleChange("zipCode", formatZipCode(e.target.value))
+              }
               placeholder="00000-000"
+              maxLength={9}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               required
             />
           </div>
 
-          {/* Rua / Endereço */}
+          {/* Rua */}
           <div className="md:col-span-2">
-            <label className="block text-sm font-medium text-gray-700 mb-2">Endereço *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Endereço *
+            </label>
             <input
               type="text"
               value={formData.street || ""}
@@ -732,7 +916,9 @@ export default function Step3AddressInfo({ formData, handleInputChange, onNext, 
 
           {/* Número */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Número *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Número *
+            </label>
             <input
               type="text"
               value={formData.number || ""}
@@ -745,7 +931,9 @@ export default function Step3AddressInfo({ formData, handleInputChange, onNext, 
 
           {/* Complemento */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Complemento</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Complemento
+            </label>
             <input
               type="text"
               value={formData.complement || ""}
@@ -757,7 +945,9 @@ export default function Step3AddressInfo({ formData, handleInputChange, onNext, 
 
           {/* Bairro */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Bairro *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Bairro *
+            </label>
             <input
               type="text"
               value={formData.neighborhood || ""}
@@ -770,7 +960,9 @@ export default function Step3AddressInfo({ formData, handleInputChange, onNext, 
 
           {/* Cidade */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Cidade *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Cidade *
+            </label>
             <input
               type="text"
               value={formData.city || ""}
@@ -783,7 +975,9 @@ export default function Step3AddressInfo({ formData, handleInputChange, onNext, 
 
           {/* Estado */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Estado *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Estado *
+            </label>
             <select
               value={formData.state || ""}
               onChange={(e) => handleChange("state", e.target.value)}
@@ -791,16 +985,33 @@ export default function Step3AddressInfo({ formData, handleInputChange, onNext, 
               required
             >
               <option value="">Selecione</option>
-              <option value="SP">São Paulo</option>
-              <option value="RJ">Rio de Janeiro</option>
-              <option value="MG">Minas Gerais</option>
-              <option value="RS">Rio Grande do Sul</option>
-              <option value="PR">Paraná</option>
-              <option value="SC">Santa Catarina</option>
+              <option value="AC">Acre</option>
+              <option value="AL">Alagoas</option>
+              <option value="AP">Amapá</option>
+              <option value="AM">Amazonas</option>
               <option value="BA">Bahia</option>
-              <option value="GO">Goiás</option>
-              <option value="PE">Pernambuco</option>
               <option value="CE">Ceará</option>
+              <option value="DF">Distrito Federal</option>
+              <option value="ES">Espírito Santo</option>
+              <option value="GO">Goiás</option>
+              <option value="MA">Maranhão</option>
+              <option value="MT">Mato Grosso</option>
+              <option value="MS">Mato Grosso do Sul</option>
+              <option value="MG">Minas Gerais</option>
+              <option value="PA">Pará</option>
+              <option value="PB">Paraíba</option>
+              <option value="PR">Paraná</option>
+              <option value="PE">Pernambuco</option>
+              <option value="PI">Piauí</option>
+              <option value="RJ">Rio de Janeiro</option>
+              <option value="RN">Rio Grande do Norte</option>
+              <option value="RS">Rio Grande do Sul</option>
+              <option value="RO">Rondônia</option>
+              <option value="RR">Roraima</option>
+              <option value="SC">Santa Catarina</option>
+              <option value="SP">São Paulo</option>
+              <option value="SE">Sergipe</option>
+              <option value="TO">Tocantins</option>
             </select>
           </div>
         </div>
@@ -816,7 +1027,7 @@ export default function Step3AddressInfo({ formData, handleInputChange, onNext, 
           </button>
           <button
             type="button"
-            onClick={onNext}
+            onClick={handleNextStep}
             className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-medium transition-colors"
           >
             Próximo →

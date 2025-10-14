@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { type } from "os";
 
 const healthInfoSchema = new mongoose.Schema({
   allergies: { type: String, trim: true },
@@ -9,6 +10,13 @@ const healthInfoSchema = new mongoose.Schema({
 const documentSchema = new mongoose.Schema({
   type: { type: String, required: true, trim: true },
   url: { type: String, required: true }
+}, { _id: false });
+
+const authorizedPersonsSchema = new mongoose.Schema({
+  name: { type: String, required: true, trim: true },
+  phone: { type: String, trim: true },
+  relationship: { type: String, trim: true }, // Ex: pai, mãe, tutor
+  documents: { type: [documentSchema] }
 }, { _id: false });
 
 const responsibleSchema = new mongoose.Schema({
@@ -29,25 +37,42 @@ const addressSchema = new mongoose.Schema({
   neighborhood: { type: String, trim: true }   // opcional
 }, { _id: false });
 
-const studentSchema = new mongoose.Schema({
-  fullName: { type: String, required: true, trim: true },
-  birthDate: { type: Date, required: true },
-  cpf: { type: String, trim: true },
-  gender: { type: String, enum: ["male", "female"], required: true },
-  nationality: { type: String, trim: true },
-  previousSchool: { type: String, trim: true },
-  grade: { type: String, trim: true },
-  healthInfo: { type: healthInfoSchema }
-}, { _id: false });
+const studentSchema = new mongoose.Schema(
+  {
+    fullName: { type: String, required: true },
+    birthDate: { type: Date, required: true },
+    cpf: { type: String, required: true },
+    gender: { type: String, required: true },
+    nationality: { type: String, required: true },
+    previousSchool: { type: String, default: "" },
+    grade: { type: String, default: "" },
+    healthInfo: { type: healthInfoSchema, default: {} },
+    authorizedPersons: {
+      type: [authorizedPersonsSchema],
+      default: [], // ✅ Agora aceita [] sem erro
+    },
+  },
+  { _id: false }
+);
 
 
-
-const enrollmentSchema = new mongoose.Schema({
-  student: { type: studentSchema, required: true },
-  responsible: { type: [responsibleSchema], required: true },
-  address: { type: addressSchema, required: true },
-  documents: { type: [documentSchema] },
-  createdAt: { type: Date, default: Date.now }
-}, { versionKey: false });
+// 📌 Modelo principal de matrícula
+const enrollmentSchema = new mongoose.Schema(
+  {
+    student: { type: studentSchema, required: true },
+    responsible: {
+      type: [responsibleSchema],
+      required: true,
+      validate: [
+        (arr) => arr.length > 0,
+        "É necessário ao menos um responsável cadastrado.",
+      ],
+    },
+    address: { type: addressSchema, required: true },
+    documents: { type: [documentSchema], default: [] },
+    createdAt: { type: Date, default: Date.now },
+  },
+  { timestamps: true }
+);
 
 export default mongoose.model("Enrollment", enrollmentSchema);

@@ -894,44 +894,221 @@
 //   );
 // }
 
+// "use client";
+// import React, { useState, useEffect } from "react";
+
+// export default function Step2ParentsInfo({
+//   formData,
+//   handleParentChange,
+//   onNext,
+//   onPrevious,
+// }) {
+//   // Estado local para os responsáveis
+//   const [parents, setParents] = useState([
+//     { name: "", cpf: "", phone: "", email: "", relationship: "", job: "" },
+//     { name: "", cpf: "", phone: "", email: "", relationship: "", job: "" },
+//   ]);
+
+//   // Atualiza o estado inicial com base no formData vindo do componente pai
+//   useEffect(() => {
+//     if (formData) {
+//       setParents([
+//         {
+//           name: formData.parent1Name || "",
+//           cpf: formData.parent1CPF || "",
+//           phone: formData.parent1Phone || "",
+//           email: formData.parent1Email || "",
+//           relationship: formData.parent1Relation || "",
+//           job: formData.parent1Job || "",
+//         },
+//         {
+//           name: formData.parent2Name || "",
+//           cpf: formData.parent2CPF || "",
+//           phone: formData.parent2Phone || "",
+//           email: formData.parent2Email || "",
+//           relationship: formData.parent2Relation || "",
+//           job: formData.parent2Job || "",
+//         },
+//       ]);
+//     }
+//   }, [formData]);
+
+//   // Formata CPF
+//   const formatCPF = (value) => {
+//     let v = value.replace(/\D/g, "");
+//     if (v.length > 11) v = v.slice(0, 11);
+//     v = v.replace(/(\d{3})(\d)/, "$1.$2");
+//     v = v.replace(/(\d{3})(\d)/, "$1.$2");
+//     v = v.replace(/(\d{3})(\d{1,2})$/, "$1-$2");
+//     return v;
+//   };
+
+//   // Formata telefone
+//   const formatPhone = (value) => {
+//     let v = value.replace(/\D/g, "");
+//     if (v.length > 11) v = v.slice(0, 11);
+//     if (v.length > 0) v = v.replace(/^(\d{2})(\d)/g, "($1) $2");
+//     if (v.length >= 7) v = v.replace(/(\d{5})(\d{4})$/, "$1-$2");
+//     return v;
+//   };
+
+//   // Atualiza o estado local e o formData global
+//   const handleChange = (index, field, value) => {
+//     const updated = [...parents];
+//     updated[index][field] = value;
+//     setParents(updated);
+
+//     // Atualiza o estado global via prop
+//     if (handleParentChange) {
+//       handleParentChange(index, field, value);
+//     }
+//   };
+
+//   return (
+//     <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-xl p-8">
+//       <h2 className="text-2xl font-bold text-gray-800 mb-6">
+//         👪 Informações dos Pais/Responsáveis
+//       </h2>
+
+//       {parents.map((parent, index) => (
+//         <div key={index} className="bg-gray-50 p-6 rounded-lg mb-6">
+//           <h3 className="text-lg font-semibold text-gray-800 mb-4">
+//             Responsável {index + 1}
+//           </h3>
+
+//           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+//             {/* Nome */}
+//             <div>
+//               <label className="block text-sm font-medium text-gray-700 mb-2">
+//                 Nome Completo *
+//               </label>
+//               <input
+//                 type="text"
+//                 value={parent.name}
+//                 onChange={(e) => handleChange(index, "name", e.target.value)}
+//                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+//               />
+//             </div>
+
+//             {/* CPF */}
+//             <div>
+//               <label className="block text-sm font-medium text-gray-700 mb-2">
+//                 CPF *
+//               </label>
+//               <input
+//                 type="text"
+//                 placeholder="000.000.000-00"
+//                 value={parent.cpf}
+//                 onChange={(e) =>
+//                   handleChange(index, "cpf", formatCPF(e.target.value))
+//                 }
+//                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+//               />
+//             </div>
+
+//             {/* Telefone */}
+//             <div>
+//               <label className="block text-sm font-medium text-gray-700 mb-2">
+//                 Telefone *
+//               </label>
+//               <input
+//                 type="tel"
+//                 placeholder="(11) 99999-9999"
+//                 value={parent.phone}
+//                 onChange={(e) =>
+//                   handleChange(index, "phone", formatPhone(e.target.value))
+//                 }
+//                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+//               />
+//             </div>
+
+//             {/* Email */}
+//             <div>
+//               <label className="block text-sm font-medium text-gray-700 mb-2">
+//                 Email
+//               </label>
+//               <input
+//                 type="email"
+//                 value={parent.email}
+//                 onChange={(e) =>
+//                   handleChange(index, "email", e.target.value)
+//                 }
+//                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+//               />
+//             </div>
+
+//             {/* Parentesco */}
+//             <div>
+//               <label className="block text-sm font-medium text-gray-700 mb-2">
+//                 Parentesco *
+//               </label>
+//               <select
+//                 value={parent.relationship}
+//                 onChange={(e) =>
+//                   handleChange(index, "relationship", e.target.value)
+//                 }
+//                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+//               >
+//                 <option value="">Selecione</option>
+//                 <option value="pai">Pai</option>
+//                 <option value="mae">Mãe</option>
+//                 <option value="avo">Avô/Avó</option>
+//                 <option value="tio/tia">Tio/Tia</option>
+//                 <option value="responsavel">Responsável Legal</option>
+//               </select>
+//             </div>
+
+//             {/* Profissão */}
+//             <div>
+//               <label className="block text-sm font-medium text-gray-700 mb-2">
+//                 Profissão
+//               </label>
+//               <input
+//                 type="text"
+//                 value={parent.job}
+//                 onChange={(e) => handleChange(index, "job", e.target.value)}
+//                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+//               />
+//             </div>
+//           </div>
+//         </div>
+//       ))}
+
+//       {/* Botões de navegação */}
+//       <div className="flex justify-between mt-8">
+//         <button
+//           type="button"
+//           onClick={onPrevious}
+//           className="bg-gray-400 hover:bg-gray-500 text-white px-6 py-3 rounded-lg font-medium transition-colors"
+//         >
+//           ← Anterior
+//         </button>
+//         <button
+//           type="button"
+//           onClick={onNext}
+//           className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors"
+//         >
+//           Próximo →
+//         </button>
+//       </div>
+//     </div>
+//   );
+// }
+
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 
 export default function Step2ParentsInfo({
   formData,
-  handleParentChange,
+  setFormData, // agora usamos setFormData diretamente
   onNext,
   onPrevious,
 }) {
-  // Estado local para os responsáveis
-  const [parents, setParents] = useState([
-    { name: "", cpf: "", phone: "", email: "", relation: "", job: "" },
-    { name: "", cpf: "", phone: "", email: "", relation: "", job: "" },
-  ]);
-
-  // Atualiza o estado inicial com base no formData vindo do componente pai
-  useEffect(() => {
-    if (formData) {
-      setParents([
-        {
-          name: formData.parent1Name || "",
-          cpf: formData.parent1CPF || "",
-          phone: formData.parent1Phone || "",
-          email: formData.parent1Email || "",
-          relation: formData.parent1Relation || "",
-          job: formData.parent1Job || "",
-        },
-        {
-          name: formData.parent2Name || "",
-          cpf: formData.parent2CPF || "",
-          phone: formData.parent2Phone || "",
-          email: formData.parent2Email || "",
-          relation: formData.parent2Relation || "",
-          job: formData.parent2Job || "",
-        },
-      ]);
-    }
-  }, [formData]);
+  // Inicializa os responsáveis caso ainda não existam
+  const responsibles = formData.responsibles || [
+    { name: "", cpf: "", phone: "", email: "", relationship: "", job: "" },
+    { name: "", cpf: "", phone: "", email: "", relationship: "", job: "" },
+  ];
 
   // Formata CPF
   const formatCPF = (value) => {
@@ -952,16 +1129,11 @@ export default function Step2ParentsInfo({
     return v;
   };
 
-  // Atualiza o estado local e o formData global
-  const handleChange = (index, field, value) => {
-    const updated = [...parents];
+  // Atualiza o estado global diretamente
+  const handleParentChange = (index, field, value) => {
+    const updated = [...responsibles];
     updated[index][field] = value;
-    setParents(updated);
-
-    // Atualiza o estado global via prop
-    if (handleParentChange) {
-      handleParentChange(index, field, value);
-    }
+    setFormData({ ...formData, responsibles: updated });
   };
 
   return (
@@ -970,7 +1142,7 @@ export default function Step2ParentsInfo({
         👪 Informações dos Pais/Responsáveis
       </h2>
 
-      {parents.map((parent, index) => (
+      {responsibles.map((responsible, index) => (
         <div key={index} className="bg-gray-50 p-6 rounded-lg mb-6">
           <h3 className="text-lg font-semibold text-gray-800 mb-4">
             Responsável {index + 1}
@@ -984,8 +1156,8 @@ export default function Step2ParentsInfo({
               </label>
               <input
                 type="text"
-                value={parent.name}
-                onChange={(e) => handleChange(index, "name", e.target.value)}
+                value={responsible.name}
+                onChange={(e) => handleParentChange(index, "name", e.target.value)}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
@@ -998,9 +1170,9 @@ export default function Step2ParentsInfo({
               <input
                 type="text"
                 placeholder="000.000.000-00"
-                value={parent.cpf || ""}
+                value={responsible.cpf}
                 onChange={(e) =>
-                  handleChange(index, "cpf", formatCPF(e.target.value))
+                  handleParentChange(index, "cpf", formatCPF(e.target.value))
                 }
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
@@ -1014,9 +1186,9 @@ export default function Step2ParentsInfo({
               <input
                 type="tel"
                 placeholder="(11) 99999-9999"
-                value={parent.phone}
+                value={responsible.phone}
                 onChange={(e) =>
-                  handleChange(index, "phone", formatPhone(e.target.value))
+                  handleParentChange(index, "phone", formatPhone(e.target.value))
                 }
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
@@ -1029,10 +1201,8 @@ export default function Step2ParentsInfo({
               </label>
               <input
                 type="email"
-                value={parent.email}
-                onChange={(e) =>
-                  handleChange(index, "email", e.target.value)
-                }
+                value={responsible.email}
+                onChange={(e) => handleParentChange(index, "email", e.target.value)}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
@@ -1043,9 +1213,9 @@ export default function Step2ParentsInfo({
                 Parentesco *
               </label>
               <select
-                value={parent.relation}
+                value={responsible.relationship}
                 onChange={(e) =>
-                  handleChange(index, "relation", e.target.value)
+                  handleParentChange(index, "relationship", e.target.value)
                 }
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
@@ -1053,7 +1223,7 @@ export default function Step2ParentsInfo({
                 <option value="pai">Pai</option>
                 <option value="mae">Mãe</option>
                 <option value="avo">Avô/Avó</option>
-                <option value="tio">Tio/Tia</option>
+                <option value="tio/tia">Tio/Tia</option>
                 <option value="responsavel">Responsável Legal</option>
               </select>
             </div>
@@ -1065,8 +1235,8 @@ export default function Step2ParentsInfo({
               </label>
               <input
                 type="text"
-                value={parent.job}
-                onChange={(e) => handleChange(index, "job", e.target.value)}
+                value={responsible.job}
+                onChange={(e) => handleParentChange(index, "job", e.target.value)}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
@@ -1094,3 +1264,4 @@ export default function Step2ParentsInfo({
     </div>
   );
 }
+

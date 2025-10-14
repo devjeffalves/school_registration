@@ -765,7 +765,7 @@
 "use client";
 import React, { useState } from "react";
 
-export default function Step4Documents({ formData, setFormData, onPrevious }) {
+export default function Step4Documents({ formData, setFormData, onPrevious, onNext }) {
   const [loading, setLoading] = useState(false);
 
   // Manipula seleção de arquivos
@@ -798,8 +798,6 @@ export default function Step4Documents({ formData, setFormData, onPrevious }) {
         notes: formData.healthNotes || "",
       };
 
-      // ✅ Authorized Persons
-      const authorizedPersons = formData.authorizedPersons || [];
 
       // 1️⃣ Campos do aluno
       const student = {
@@ -811,35 +809,21 @@ export default function Step4Documents({ formData, setFormData, onPrevious }) {
         previousSchool: formData.previousSchool,
         grade: formData.desiredGrade,
         healthInfo,
-        authorizedPersons: authorizedPersons.map((p) => ({
+        authorizedPersons: formData.authorizedPersons?.map((p) => ({
           name: p.name,
           phone: p.phone,
           relationship: p.relation,
           documentName: p.document ? p.document.name : null,
-        })),
+        })) || [],
       };
       formDataToSend.append("student", JSON.stringify(student));
 
       // 2️⃣ Campos dos responsáveis
-      const parents = [
-        {
-          name: formData.parent1Name || "",
-          cpf: formData.parent1CPF || "",
-          phone: formData.parent1Phone || "",
-          email: formData.parent1Email || "",
-          job: formData.parent1Job || "",
-          relationship: formData.parent1Relation || "",
-        },
-        {
-          name: formData.parent2Name || "",
-          cpf: formData.parent2CPF || "",
-          phone: formData.parent2Phone || "",
-          email: formData.parent2Email || "",
-          job: formData.parent2Job || "",
-          relationship: formData.parent2Relation || "",
-        },
-      ].filter((p) => p.name.trim() !== "");
-      formDataToSend.append("responsible", JSON.stringify(parents));
+      const responsibles = (formData.responsibles || []).filter(
+        (r) => r.name.trim() !== ""
+      );
+      formDataToSend.append("responsible", JSON.stringify(responsibles));
+
 
       // 3️⃣ Endereço
       const address = {
@@ -871,15 +855,19 @@ export default function Step4Documents({ formData, setFormData, onPrevious }) {
       if (!res.ok) throw new Error("Falha ao enviar matrícula");
 
       const result = await res.json();
-      alert("✅ Matrícula enviada com sucesso!");
       console.log("Resposta da API:", result);
+      alert("✅ Matrícula enviada com sucesso!");
+
+      // ✅ Avança para a Step5Review
+      if (typeof onNext === "function") onNext();
+
     } catch (error) {
       console.error("❌ Erro ao finalizar matrícula:", error);
       alert("Erro ao enviar matrícula. Tente novamente.");
     } finally {
       setLoading(false);
-    }
-  };
+    };
+  }
 
   return (
     <div id="step4" className="fade-in max-w-4xl mx-auto bg-white rounded-2xl shadow-xl p-8">
@@ -925,13 +913,13 @@ export default function Step4Documents({ formData, setFormData, onPrevious }) {
             ← Anterior
           </button>
           <button
-            onClick={handleFinalSubmit}
-            disabled={loading}
-            className={`${loading ? "bg-gray-400 cursor-not-allowed" : "bg-green-600 hover:bg-green-700"} text-white px-8 py-3 rounded-lg font-medium transition-colors`}
+            onClick={onNext} // apenas avança para Step5Review
+            className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-medium transition-colors"
           >
-            {loading ? "Enviando..." : "Finalizar Matrícula ✓"}
+            Próximo → Revisar Dados
           </button>
         </div>
+
       </div>
     </div>
   );
