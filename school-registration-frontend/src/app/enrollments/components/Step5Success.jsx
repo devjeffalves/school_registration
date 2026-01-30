@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 
-export default function Step5Success({ enrollmentId, onRestart }) {
+export default function Step5Success({ protocol, onRestart }) {
   return (
     <div className="fade-in max-w-2xl mx-auto bg-white rounded-2xl shadow-xl p-8 text-center">
       <div className="text-6xl mb-4">🎉</div>
@@ -12,7 +12,7 @@ export default function Step5Success({ enrollmentId, onRestart }) {
         Seu protocolo de matrícula é:
       </p>
       <div className="inline-block bg-blue-100 text-blue-800 font-mono px-6 py-3 rounded-lg mb-6">
-        {enrollmentId}
+        {protocol}
       </div>
       <div>
         <button

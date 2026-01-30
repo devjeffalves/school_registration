@@ -4,7 +4,7 @@ import { type } from "os";
 const healthInfoSchema = new mongoose.Schema({
   allergies: { type: String, trim: true },
   medications: { type: String, trim: true },
-  notes: { type: String, trim: true }
+  notesfeverMedicine: { type: String, trim: true }
 }, { _id: false });
 
 const documentSchema = new mongoose.Schema({
@@ -14,9 +14,14 @@ const documentSchema = new mongoose.Schema({
 
 const authorizedPersonsSchema = new mongoose.Schema({
   name: { type: String, required: true, trim: true },
-  phone: { type: String, trim: true },
-  relationship: { type: String, trim: true }, // Ex: pai, mãe, tutor
-  documents: { type: [documentSchema] }
+  phone: { type: String, required: true, trim: true },
+  relation: { type: String, required: true, trim: true },
+  document: {
+    type: new mongoose.Schema({
+      type: { type: String, required: true, trim: true },
+      url: { type: String, required: true }
+    }, { _id: false })
+  }
 }, { _id: false });
 
 const responsibleSchema = new mongoose.Schema({
@@ -24,7 +29,8 @@ const responsibleSchema = new mongoose.Schema({
   cpf: { type: String, trim: true },
   phone: { type: String, trim: true },
   email: { type: String, trim: true },
-  relationship: { type: String, trim: true } // Ex: pai, mãe, tutor
+  relationship: { type: String, trim: true }, // Ex: pai, mãe, tutor
+  job: { type: String, trim: true }
 }, { _id: false });
 
 const addressSchema = new mongoose.Schema({
@@ -32,9 +38,9 @@ const addressSchema = new mongoose.Schema({
   city: { type: String, required: true, trim: true },
   state: { type: String, required: true, trim: true },
   zipCode: { type: String, required: true, trim: true },
-  number: { type: String, trim: true },        // opcional
-  complement: { type: String, trim: true },    // opcional
-  neighborhood: { type: String, trim: true }   // opcional
+  number: { type: String, trim: true },
+  complement: { type: String, trim: true },
+  neighborhood: { type: String, trim: true }
 }, { _id: false });
 
 const studentSchema = new mongoose.Schema(
@@ -46,11 +52,23 @@ const studentSchema = new mongoose.Schema(
     nationality: { type: String, required: true },
     previousSchool: { type: String, default: "" },
     grade: { type: String, default: "" },
+
     healthInfo: { type: healthInfoSchema, default: {} },
+
+    studentInterests: { type: String, default: "" },
+    studentSkills: { type: String, default: "" },
+    studentDifficulties: { type: String, default: "" },
+
     authorizedPersons: {
       type: [authorizedPersonsSchema],
-      default: [], // ✅ Agora aceita [] sem erro
+      validate: {
+        validator: function (arr) {
+          return arr.length > 0;
+        },
+        message: "Deve haver ao menos uma pessoa autorizada a buscar o aluno.",
+      },
     },
+
   },
   { _id: false }
 );

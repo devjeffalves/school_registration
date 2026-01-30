@@ -1,5 +1,5 @@
 export default function StepIndicator({ currentStep }) {
-    const steps = [1, 2, 3, 4, 5];
+    const steps = [1, 2, 3, 4, 5, 6];
 
     return (
         <div className="flex justify-center mb-8">

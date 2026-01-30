@@ -373,16 +373,19 @@ import axios from "axios";
 
 export default function EnrollmentPage() {
   const [currentStep, setCurrentStep] = useState(1);
+  const [protocol, setProtocol] = useState(null);
+
 
   const [formData, setFormData] = useState({
     // 👧 Aluno
     studentName: "",
     studentCPF: "",
     studentBirthDate: "",
-    studentGender: "",
+    gender: "",
     nationality: "",
     previousSchool: "",
     desiredGrade: "",
+    authorizedPersons: "",
 
     // 👪 Responsáveis
     responsibles: [
@@ -441,10 +444,11 @@ export default function EnrollmentPage() {
           fullName: formData.studentName,
           cpf: formData.studentCPF,
           birthDate: formData.studentBirthDate,
-          gender: formData.studentGender,
+          gender: formData.gender,
           nationality: formData.nationality,
           previousSchool: formData.previousSchool,
           grade: formData.desiredGrade,
+          authorizedPersons: formData.authorizedPersons
         },
         responsible,
         address,
@@ -469,6 +473,7 @@ export default function EnrollmentPage() {
       {currentStep === 1 && (
         <Step1StudentInfo
           formData={formData}
+          setFormData={setFormData}
           handleInputChange={handleInputChange}
           nextStep={nextStep}
         />
@@ -477,7 +482,7 @@ export default function EnrollmentPage() {
       {currentStep === 2 && (
         <Step2ParentsInfo
           formData={formData}
-          setFormData={setFormData}  // ✅ aqui está a mudança
+          setFormData={setFormData}
           onNext={nextStep}
           onPrevious={prevStep}
         />
@@ -505,12 +510,47 @@ export default function EnrollmentPage() {
       {currentStep === 5 && (
         <Step5Review
           formData={formData}
-          onPrevious={prevStep}
-          onSubmit={handleSubmit}
+          onPrevious={() => setCurrentStep(4)}
+          onSuccess={(generatedProtocol) => {
+            setProtocol(generatedProtocol);
+            setCurrentStep(6); // Vai para tela de sucesso
+          }}
         />
       )}
 
-      {currentStep === 6 && <Step5Success />}
+      {currentStep === 6 && (
+        <Step5Success
+          protocol={protocol}
+          onRestart={() => {
+            setFormData({
+              // reinicia todos os campos necessários
+              studentName: "",
+              studentCPF: "",
+              studentBirthDate: "",
+              gender: "",
+              nationality: "",
+              previousSchool: "",
+              desiredGrade: "",
+              authorizedPersons: "",
+              responsibles: [
+                { name: "", cpf: "", phone: "", email: "", relationship: "", job: "" },
+                { name: "", cpf: "", phone: "", email: "", relationship: "", job: "" },
+              ],
+              zipCode: "",
+              street: "",
+              number: "",
+              complement: "",
+              neighborhood: "",
+              city: "",
+              state: "",
+              documents: [],
+            });
+            setProtocol(null);
+            setCurrentStep(1);
+          }}
+        />
+      )}
+
     </div>
   );
 }
