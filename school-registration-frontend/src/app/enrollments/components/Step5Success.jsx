@@ -19,7 +19,7 @@ export default function Step5Success({ protocol, onRestart }) {
           onClick={onRestart}
           className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-lg font-medium transition-colors"
         >
-          Nova Matrícula
+          Sair
         </button>
       </div>
     </div>

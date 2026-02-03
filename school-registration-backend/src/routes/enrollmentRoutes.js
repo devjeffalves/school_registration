@@ -5,7 +5,7 @@ import multer from "multer";
 import Enrollment from "../models/Enrollment.js";
 import { bucket } from "../firebase.js";
 import { handleUpload } from "../controllers/uploadController.js";
-import { uploadFileToFirebase } from "../services/upload.js";
+import { uploadFileToFirebase, generateFirebasePath } from "../services/upload.js";
 
 const router = express.Router();
 
@@ -33,7 +33,21 @@ function tryParseJSON(str) {
 
 // Upload para Firebase Storage usando a nova função organizada
 async function uploadBufferToFirebase(file, studentName, protocol, documentType) {
-  return await uploadFileToFirebase(file, studentName, protocol, documentType);
+  console.log("🚀 Chamando uploadFileToFirebase com:", {
+    fileName: file.originalname,
+    studentName,
+    protocol,
+    documentType
+  });
+  
+  try {
+    const result = await uploadFileToFirebase(file, studentName, protocol, documentType);
+    console.log("✅ uploadFileToFirebase retornou:", result?.substring(0, 100));
+    return result;
+  } catch (error) {
+    console.error("❌ Erro em uploadFileToFirebase:", error);
+    throw error;
+  }
 }
 
 // POST / -> cria nova matrícula
@@ -50,8 +64,49 @@ router.post("/", upload, async (req, res) => {
 
     // --- Student ---
     const studentBody = tryParseJSON(req.body.student) || {};
-    const studentName = studentBody.fullName || "aluno-nao-informado";
-    const protocol = studentBody.protocol || "sem-protocolo";
+    let studentName = studentBody.fullName || "";
+    let protocol = studentBody.protocol || "";
+    
+    console.log("👤 DEBUG INICIAL:", {
+      reqBodyStudent: req.body.student,
+      studentBody,
+      originalName: studentBody.fullName,
+      studentNameAntes: studentName
+    });
+    
+    // Garante nome válido do aluno (VERIFICAÇÃO PRIMEIRO)
+    if (!studentName || studentName.trim().length < 2) {
+      console.warn("⚠️ Nome do aluno inválido, usando padrão");
+      studentName = "aluno-sem-nome";
+    }
+    
+    // Gera protocolo se não existir
+    if (!protocol) {
+      const date = new Date();
+      const datePart = date.toISOString().slice(0, 10).replace(/-/g, "");
+      const randomPart = Math.random().toString(36).substring(2, 6).toUpperCase();
+      protocol = `MAT-${datePart}-${randomPart}`;
+      
+      console.log("🎫 Protocolo gerado:", protocol);
+      // Atualiza o studentBody com o protocolo gerado
+      studentBody.protocol = protocol;
+    }
+    
+    // NOVA VERIFICAÇÃO - garante que o nome ainda é válido
+    if (!studentName || studentName.trim().length < 2) {
+      console.error("❌ Nome do aluno inválido após processamento");
+      studentName = "aluno-sem-nome";
+    }
+    
+    console.log("🔍 DADOS EXTRAÍDOS ANTES DA VALIDAÇÃO:", {
+      studentNameOriginal: studentBody.fullName,
+      studentName,
+      protocolOriginal: studentBody.protocol,
+      protocol,
+      studentBodyKeys: Object.keys(studentBody),
+      hasAuthorizedPersons: !!studentBody.authorizedPersons,
+      authorizedPersonsCount: Array.isArray(studentBody.authorizedPersons) ? studentBody.authorizedPersons.length : 0
+    });
 
     // Processa authorizedPersons do JSON
     const authorizedPersonsArray = Array.isArray(studentBody.authorizedPersons)
@@ -59,12 +114,65 @@ router.post("/", upload, async (req, res) => {
       : [];
 
     // Associa arquivos das pessoas autorizadas
+    console.log("🔍 VERIFICANDO DOCUMENTOS AUTORIZADOS:", {
+      hasAuthorizedPersonDocuments: !!req.files?.authorizedPersonDocuments,
+      count: req.files?.authorizedPersonDocuments?.length || 0,
+      authorizedPersonsArrayLength: authorizedPersonsArray.length
+    });
+    
     if (req.files?.authorizedPersonDocuments?.length) {
+      const uploadTimestamp = Date.now(); // Usa mesmo timestamp para evitar duplicatas
+      
       for (let i = 0; i < req.files.authorizedPersonDocuments.length; i++) {
         const file = req.files.authorizedPersonDocuments[i];
-        const url = await uploadBufferToFirebase(file, studentName, protocol, `documento-autorizado-${i}`);
+        const documentType = `documento-autorizado-${i + 1}`;
+        
+        console.log(`📄 Processando documento autorizado ${i}:`, {
+          fileName: file.originalname,
+          documentType,
+          studentName,
+          protocol,
+          hasPerson: !!authorizedPersonsArray[i]
+        });
+        
+        // Verifica se já existe documento para esta pessoa
         if (authorizedPersonsArray[i]) {
-          authorizedPersonsArray[i].document = { type: file.mimetype, url };
+          try {
+            console.log(`📄 Fazendo upload do documento ${i}: ${file.originalname} para ${studentName}`);
+            const url = await uploadBufferToFirebase(file, studentName, protocol, documentType);
+            
+            console.log(`🔗 URL recebida: ${url}`);
+            console.log(`🔗 Tipo da URL: ${typeof url}`);
+            console.log(`🔗 URL vazia? ${!url}`);
+            
+            authorizedPersonsArray[i].document = { 
+              type: file.mimetype, 
+              url,
+              name: file.originalname,
+              documentType: documentType
+            };
+            
+            console.log(`✅ Documento associado à pessoa ${i}:`, authorizedPersonsArray[i].document);
+            
+            // Adiciona à lista geral de documentos também
+            const docObj = {
+              name: file.originalname,
+              url,
+              type: file.mimetype,
+              documentType: documentType,
+              firebasePath: generateFirebasePath(studentName, protocol, documentType, uploadTimestamp + i, file.originalname.split('.').pop()),
+              category: 'pessoa-autorizada',
+              personIndex: i,
+              personName: authorizedPersonsArray[i]?.name || `Pessoa Autorizada ${i + 1}`
+            };
+            
+            console.log(`📋 Adicionando à lista de documentos:`, docObj);
+            documents.push(docObj);
+          } catch (error) {
+            console.error(`❌ Erro no upload do documento autorizado ${i}:`, error);
+          }
+        } else {
+          console.warn(`⚠️ Pessoa autorizada ${i} não encontrada, ignorando documento ${file.originalname}`);
         }
       }
     }
@@ -126,18 +234,11 @@ router.post("/", upload, async (req, res) => {
 
     // --- Documents ---
     let documents = [];
-    if (req.files?.authorizedPersonDocuments?.length) {
-      for (let i = 0; i < req.files.authorizedPersonDocuments.length; i++) {
-        const file = req.files.authorizedPersonDocuments[i];
-        const url = await uploadBufferToFirebase(file);
-        if (authorizedPersonsArray[i]) {
-          authorizedPersonsArray[i].document = { type: file.mimetype, url };
-        }
-      }
-    }
-
+    // Nota: authorizedPersonDocuments já foram processados nas linhas 62-70
 
     if (req.files?.documents?.length) {
+      const uploadTimestamp = Date.now(); // Usa mesmo timestamp base
+      
       for (let i = 0; i < req.files.documents.length; i++) {
         const file = req.files.documents[i];
         const allowed = ["application/pdf", "image/jpeg", "image/jpg", "image/png"];
@@ -161,21 +262,48 @@ router.post("/", upload, async (req, res) => {
           documentType = 'historico-escolar';
         }
         
+        console.log(`📄 Fazendo upload do documento principal ${i}: ${file.originalname} para ${studentName}`);
         const url = await uploadBufferToFirebase(file, studentName, protocol, documentType);
-        documents.push({ 
-          name: file.originalname, 
-          url, 
+        
+        console.log(`🔗 URL recebida: ${url}`);
+        
+        const docObj = {
+          name: file.originalname,
+          url,
           type: file.mimetype,
           documentType: documentType,
-          firebasePath: `matriculas/${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}/${studentName.toLowerCase().replace(/\s+/g, '-')}/${protocol}/${documentType}_${Date.now()}.${file.originalname.split('.').pop()}`
-        });
+          category: 'documento-aluno',
+          firebasePath: generateFirebasePath(studentName, protocol, documentType, uploadTimestamp + i, file.originalname.split('.').pop())
+        };
+        
+        console.log(`📋 Adicionando documento principal à lista:`, docObj);
+        documents.push(docObj);
       }
     }
 
-    // --- Payload final ---
+
+
+// --- Payload final ---
     const enrollmentPayload = { student, responsible, address, documents, createdAt: new Date() };
+    
+    console.log("💾 SALVANDO NO MONGODB:", {
+      studentName: student.fullName,
+      protocol: studentBody.protocol,
+      documentsCount: documents.length,
+      authorizedPersonsArrayLength: authorizedPersonsArray.length,
+      documents: documents.map((d, index) => ({
+        index,
+        name: d.name,
+        hasUrl: !!d.url,
+        url: d.url ? d.url.substring(0, 50) + "..." : "SEM_URL",
+        urlLength: d.url ? d.url.length : 0,
+        category: d.category
+      }))
+    });
+    
     const enrollment = await Enrollment.create(enrollmentPayload);
 
+    console.log("✅ Matrícula salva com sucesso no MongoDB!");
     return res.status(201).json({ message: "✅ Matrícula registrada com sucesso!", enrollment });
   } catch (error) {
     console.error("Erro ao registrar matrícula:", error);
@@ -202,7 +330,7 @@ router.get("/documents/:studentName/:protocol", async (req, res) => {
   try {
     const { studentName, protocol } = req.params;
     const { listStudentDocuments } = await import("../services/upload.js");
-    
+
     const documents = await listStudentDocuments(studentName, protocol);
     res.json({ studentName, protocol, documents });
   } catch (error) {
